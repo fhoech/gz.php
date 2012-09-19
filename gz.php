@@ -24,12 +24,12 @@
  * THE SOFTWARE.
  * --
  * 
- * @package		gz.php
- * @link		https://github.com/fhoech/gz.php
- * @author		Florian Höch <florian.hoech@gmx.de>
- * @copyright	2012 Florian Höch <florian.hoech@gmx.de>
- * @license		http://opensource.org/licenses/mit-license.php MIT License
- * @version		1.0
+ * @package     gz.php
+ * @link        https://github.com/fhoech/gz.php
+ * @author      Florian Höch <florian.hoech@gmx.de>
+ * @copyright   2012 Florian Höch <florian.hoech@gmx.de>
+ * @license     http://opensource.org/licenses/mit-license.php MIT License
+ * @version     1.0
  */
 
 function get_content_type($file) {
@@ -91,7 +91,7 @@ function main() {
         // original file has changed
         $gzfile = $file . '.gz';
         if (!file_exists($gzfile) || filemtime($gzfile) < $mtime) {
-			$buffer = file_get_contents($file);
+            $buffer = file_get_contents($file);
             if (preg_match_all('/<!--#include file="([^"]+)" -->/',
                                $buffer, $matches, PREG_SET_ORDER)) {
                 // Includes
@@ -106,21 +106,21 @@ function main() {
                                               $buffer);
                 }
             }
-			// Minify CSS and JS if the filename does not contain 'min.<ext>'
-			switch ($content_type) {
-				case 'text/css; charset=UTF-8':
-					if (strpos($file, 'min.css') === false) {
-						require_once('cssmin-v3.0.1.php');
-						$buffer = CssMin::minify($buffer);
-					}
-					break;
-				case 'application/javascript':
-					if (strpos($file, 'min.js') === false) {
-						require_once('jsmin.php');
-						$buffer = JSMin::minify($buffer);
-					}
-					break;
-			}
+            // Minify CSS and JS if the filename does not contain 'min.<ext>'
+            switch ($content_type) {
+                case 'text/css; charset=UTF-8':
+                    if (strpos($file, 'min.css') === false) {
+                        require_once('cssmin-v3.0.1.php');
+                        $buffer = CssMin::minify($buffer);
+                    }
+                    break;
+                case 'application/javascript':
+                    if (strpos($file, 'min.js') === false) {
+                        require_once('jsmin.php');
+                        $buffer = JSMin::minify($buffer);
+                    }
+                    break;
+            }
             file_put_contents($gzfile, gzencode($buffer));
         }
         // Send compression headers and use the .gz file instead of the
