@@ -1,0 +1,16 @@
+# BEGIN GZIP
+<IfModule mod_rewrite.c>
+## If the user agent accepts gzip encoding...
+#RewriteCond %{HTTP:Accept-Encoding} gzip
+## ...and if gzip-encoded version of the requested file exists (<file>.gz)...
+#RewriteCond %{REQUEST_FILENAME}.gz -f
+## ...then serve the gzip-encoded file. Done.
+#RewriteRule ^(.+)$ $1.gz [L]
+# Or if the user agent accepts gzip encoding...
+RewriteCond %{HTTP:Accept-Encoding} gzip
+# ...and the requested file exists...
+RewriteCond %{REQUEST_FILENAME} -f
+# ...then use a PHP script serve a compressed version. Done.
+RewriteRule \.(css|html|ico|js|json|txt|xml)$ /gz.php [L]
+</IfModule>
+# END GZIP
