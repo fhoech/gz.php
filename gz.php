@@ -102,7 +102,7 @@ function main() {
                         $include = $path . '/' . $set[1];
                     if (file_exists($include))
                         $buffer = str_replace($set[0],
-                                              file_get_contents($include),
+                                              file_get_contents($include) . ($content_type == 'application/javascript' ? ';' : ''),
                                               $buffer);
                 }
             }
