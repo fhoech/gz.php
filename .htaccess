@@ -19,6 +19,6 @@ RewriteRule ^(.+)$ $1.min [L]
 # Or if the requested file exists...
 RewriteCond %{REQUEST_FILENAME} -f
 # ...then use a PHP script serve a minified version. Done.
-RewriteRule \.(css|html|ico|js|json|svg|txt|xml)$ /gz.php [L]
+RewriteRule \.(css|htm|html|ico|js|json|svg|txt|xml)$ /gz.php [L]
 </IfModule>
 # END GZIP
