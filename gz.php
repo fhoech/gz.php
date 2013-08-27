@@ -29,7 +29,7 @@
  * @author      Florian Höch <florian.hoech@gmx.de>
  * @copyright   2012 Florian Höch <florian.hoech@gmx.de>
  * @license     http://opensource.org/licenses/mit-license.php MIT License
- * @version     1.0
+ * @version     $Id$
  */
 
 define('CHARSET', 'utf-8');

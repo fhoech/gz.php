@@ -29,7 +29,7 @@
  * @author		Joe Scylla <joe.scylla@gmail.com>
  * @copyright	2008 - 2011 Joe Scylla <joe.scylla@gmail.com>
  * @license		http://opensource.org/licenses/mit-license.php MIT License
- * @version		3.0.1
+ * @version		3.0.1-$Id$
  */
 /**
  * Abstract definition of a CSS token class.
@@ -41,7 +41,7 @@
  * @author		Joe Scylla <joe.scylla@gmail.com>
  * @copyright	2008 - 2011 Joe Scylla <joe.scylla@gmail.com>
  * @license		http://opensource.org/licenses/mit-license.php MIT License
- * @version		3.0.1
+ * @version		3.0.1-$Id$
  */
 abstract class aCssToken
 	{

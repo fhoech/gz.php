@@ -42,7 +42,7 @@
 * @copyright 2008 Ryan Grove <ryan@wonko.com> (PHP port)
 * @copyright 2012 Adam Goforth <aag@adamgoforth.com> (Updates)
 * @license http://opensource.org/licenses/mit-license.php MIT License
-* @version 1.1.2 (2012-05-01)
+* @version 1.1.2 (2012-05-01) $Id$
 * @link https://github.com/rgrove/jsmin-php
 */
 
