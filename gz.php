@@ -32,12 +32,14 @@
  * @version     1.0
  */
 
+define('CHARSET', 'utf-8');
+
 function get_content_type($file) {
     // Determine Content-Type based on file extension
     $info = pathinfo($file);
-    $content_types = array('css' => 'text/css; charset=UTF-8',
-                           'htm' => 'text/html; charset=UTF-8',
-                           'html' => 'text/html; charset=UTF-8',
+    $content_types = array('css' => 'text/css',
+                           'htm' => 'text/html',
+                           'html' => 'text/html',
                            'gif' => 'image/gif',
                            'ico' => 'image/x-icon',
                            'jpg' => 'image/jpeg',
@@ -108,7 +110,7 @@ function main() {
             }
             // Minify CSS and JS if the filename does not contain 'min.<ext>'
             switch ($content_type) {
-                case 'text/css; charset=UTF-8':
+                case 'text/css':
                     if (strpos($file, 'min.css') === false) {
                         require_once('cssmin-v3.0.1.php');
                         $buffer = CssMin::minify($buffer);
@@ -148,7 +150,8 @@ function main() {
     header('Cache-Control: max-age=' . $maxage);
     header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $maxage) . ' GMT');
     header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
-    header('Content-Type: ' . $content_type);
+    header('Content-Type: ' . $content_type .
+           (strpos($content_type, 'text/') === 0 ? '; charset=' . CHARSET : ''));
     header('Content-Length: ' . filesize($file));
     
     // If the request method isn't HEAD, send the file contents
