@@ -165,8 +165,15 @@ function main() {
     header('Cache-Control: max-age=' . $maxage);
     header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $maxage) . ' GMT');
     header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
-    header('Content-Type: ' . $content_type .
-           (strpos($content_type, 'text/') === 0 ? '; charset=' . CHARSET : ''));
+    if (in_array($content_type, array('application/javascript',
+                                      'application/json',
+                                      'application/xml',
+                                      'image/svg+xml',
+                                      'text/css',
+                                      'text/html',
+                                      'text/plain')))
+        $content_type .= '; charset=' . CHARSET;
+    header('Content-Type: ' . $content_type);
     header('Content-Length: ' . filesize($file));
     
     // If the request method isn't HEAD, send the file contents
