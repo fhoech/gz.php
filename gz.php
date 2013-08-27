@@ -127,7 +127,7 @@ function main() {
             switch ($content_type) {
                 case 'text/css':
                     if (strpos($file, 'min.css') === false) {
-                        require_once('cssmin-v3.0.1.php');
+                        require_once('cssmin.php');
                         $buffer = CssMin::minify($buffer);
                     }
                     break;
