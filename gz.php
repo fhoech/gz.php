@@ -102,10 +102,25 @@ function main() {
                     $include = $set[1];
                     if (realpath($set[1]) != $set[1])
                         $include = $path . '/' . $set[1];
-                    if (file_exists($include))
-                        $buffer = str_replace($set[0],
-                                              file_get_contents($include) . ($content_type == 'application/javascript' ? ';' : ''),
-                                              $buffer);
+                    if (file_exists($include)) {
+                        $tmp = file_get_contents($include);
+                        if ($content_type == 'text/css') {
+                            // Make sure url() paths are correct for CSS files 
+                            // included from subfolders
+                            $include_path = dirname($set[1]);
+                            // Protect absolute URLs and URLs beginning with '/'
+                            $tmp = preg_replace('/(\burl\(\s*[\'"]?)(http:|https:|\/)/',
+                                                "$1\0$2", $tmp);
+                            $tmp = preg_replace('/(\burl\(\s*[\'"]?)([^\0])/',
+                                                '$1' . $include_path . '/$2',
+                                                $tmp);
+                            $tmp = preg_replace('/(\burl\(\s*[\'"]?)\0/', "$1",
+                                                $tmp);
+                        }
+                        if ($content_type == 'application/javascript')
+                            $tmp .= ';';
+                        $buffer = str_replace($set[0], $tmp, $buffer);
+                    }
                 }
             }
             // Minify CSS and JS if the filename does not contain 'min.<ext>'
