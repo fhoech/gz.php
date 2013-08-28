@@ -115,10 +115,10 @@ function main() {
     $gz = (!empty($_SERVER['HTTP_ACCEPT_ENCODING']) &&
            in_array('gzip', preg_split('/\s*,\s*/',
                                        $_SERVER['HTTP_ACCEPT_ENCODING'])));
-    if (strpos($file, '.php.') === false /* Fix for 1&1 config */) {
-        // Only write the compressed version if it does not yet exist or the
-        // original file has changed
-        $outfile = $file . ($gz ? '.gz' : '.min');
+
+    // Only write the compressed version if it does not yet exist or the
+    // original file has changed
+    $outfile = $file . ($gz ? '.gz' : '.min');
         if (!file_exists($outfile) || filemtime($outfile) < $mtime) {
             $buffer = file_get_contents($file);
             if (preg_match_all('/<!--#include file="([^"]+)" -->/',
@@ -171,7 +171,6 @@ function main() {
         // original filename
         if ($gz) header('Content-Encoding: gzip');
         $file = $outfile;
-    }
 
     // Vary max-age and expiration headers based on content type
     switch ($content_type) {
