@@ -119,58 +119,58 @@ function main() {
     // Only write the compressed version if it does not yet exist or the
     // original file has changed
     $outfile = $file . ($gz ? '.gz' : '.min');
-        if (!file_exists($outfile) || filemtime($outfile) < $mtime) {
-            $buffer = file_get_contents($file);
-            if (preg_match_all('/<!--#include file="([^"]+)" -->/',
-                               $buffer, $matches, PREG_SET_ORDER)) {
-                // Includes
-                $path = dirname($file);
-                foreach ($matches as $set) {
-                    $include = $set[1];
-                    if (realpath($set[1]) != $set[1])
-                        $include = $path . '/' . $set[1];
-                    if (file_exists($include)) {
-                        $tmp = file_get_contents($include);
-                        if ($content_type == 'text/css') {
-                            // Make sure url() paths are correct for CSS files 
-                            // included from subfolders
-                            $include_path = dirname($set[1]);
-                            // Protect absolute URLs and URLs beginning with '/'
-                            $tmp = preg_replace('/(\burl\(\s*[\'"]?)(http:|https:|\/)/',
-                                                "$1\0$2", $tmp);
-                            $tmp = preg_replace('/(\burl\(\s*[\'"]?)([^\0])/',
-                                                '$1' . $include_path . '/$2',
-                                                $tmp);
-                            $tmp = preg_replace('/(\burl\(\s*[\'"]?)\0/', "$1",
-                                                $tmp);
-                        }
-                        if ($content_type == 'application/javascript')
-                            $tmp .= ';';
-                        $buffer = str_replace($set[0], $tmp, $buffer);
+    if (!file_exists($outfile) || filemtime($outfile) < $mtime) {
+        $buffer = file_get_contents($file);
+        if (preg_match_all('/<!--#include file="([^"]+)" -->/',
+                           $buffer, $matches, PREG_SET_ORDER)) {
+            // Includes
+            $path = dirname($file);
+            foreach ($matches as $set) {
+                $include = $set[1];
+                if (realpath($set[1]) != $set[1])
+                    $include = $path . '/' . $set[1];
+                if (file_exists($include)) {
+                    $tmp = file_get_contents($include);
+                    if ($content_type == 'text/css') {
+                        // Make sure url() paths are correct for CSS files 
+                        // included from subfolders
+                        $include_path = dirname($set[1]);
+                        // Protect absolute URLs and URLs beginning with '/'
+                        $tmp = preg_replace('/(\burl\(\s*[\'"]?)(http:|https:|\/)/',
+                                            "$1\0$2", $tmp);
+                        $tmp = preg_replace('/(\burl\(\s*[\'"]?)([^\0])/',
+                                            '$1' . $include_path . '/$2',
+                                            $tmp);
+                        $tmp = preg_replace('/(\burl\(\s*[\'"]?)\0/', "$1",
+                                            $tmp);
                     }
+                    if ($content_type == 'application/javascript')
+                        $tmp .= ';';
+                    $buffer = str_replace($set[0], $tmp, $buffer);
                 }
             }
-            // Minify CSS and JS if the filename does not contain 'min.<ext>'
-            switch ($content_type) {
-                case 'text/css':
-                    if (strpos($file, 'min.css') === false) {
-                        require_once('cssmin.php');
-                        $buffer = CssMin::minify($buffer);
-                    }
-                    break;
-                case 'application/javascript':
-                    if (strpos($file, 'min.js') === false) {
-                        require_once('jsmin.php');
-                        $buffer = JSMin::minify($buffer);
-                    }
-                    break;
-            }
-            file_put_contents($outfile, $gz ? gzencode($buffer) : $buffer);
         }
-        // Send compression headers and use the .gz file instead of the
-        // original filename
-        if ($gz) header('Content-Encoding: gzip');
-        $file = $outfile;
+        // Minify CSS and JS if the filename does not contain 'min.<ext>'
+        switch ($content_type) {
+            case 'text/css':
+                if (strpos($file, 'min.css') === false) {
+                    require_once('cssmin.php');
+                    $buffer = CssMin::minify($buffer);
+                }
+                break;
+            case 'application/javascript':
+                if (strpos($file, 'min.js') === false) {
+                    require_once('jsmin.php');
+                    $buffer = JSMin::minify($buffer);
+                }
+                break;
+        }
+        file_put_contents($outfile, $gz ? gzencode($buffer) : $buffer);
+    }
+    // Send compression headers and use the .gz file instead of the
+    // original filename
+    if ($gz) header('Content-Encoding: gzip');
+    $file = $outfile;
 
     // Vary max-age and expiration headers based on content type
     switch ($content_type) {
