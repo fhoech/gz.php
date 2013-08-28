@@ -55,6 +55,33 @@ function get_content_type($file) {
     return $content_types[$info['extension']];
 }
 
+function errordocument($status, $message) {
+	header('Cache-Control: no-store, no-cache, must-revalidate');
+	$errors = array(400 => 'Bad Request',
+					401 => 'Unauthorized',
+					403 => 'Forbidden',
+					404 => 'Not Found',
+					405 => 'Method Not Allowed',
+					416 => 'Requested Range Not Satisfiable',
+					500 => 'Internal Server Error',
+					503 => 'Service Unavailable');
+    header($_SERVER['SERVER_PROTOCOL'] . ' ' . $status . ' ' . $errors[$status]);
+    header('Content-Type: text/html; charset=UTF-8');
+    ?>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+    </head>
+    <body>
+        <header><h1><?php echo $status . ' ' . $errors[$status]; ?></h1></header>
+        <p><?php echo htmlspecialchars($message, ENT_COMPAT, 'UTF-8'); ?></p>
+    </body>
+</html>
+    <?php
+    die();
+}
+
 function main() {
     // Get file path by stripping query parameters from the request URI
     if (!empty($_SERVER['REQUEST_URI']))
@@ -63,15 +90,15 @@ function main() {
     // If the path is empty, either use DEFAULT_FILENAME if defined, or exit
     if (empty($path)) {
         if (defined('DEFAULT_FILENAME')) $path = '/' . DEFAULT_FILENAME;
-        else die();
+        else errordocument(403, 'No file path given.');
     }
 
     $file = dirname(__FILE__) . $path;
-    if (!file_exists($file)) die();
+    if (!file_exists($file)) errordocument(404, 'The file "' . $path . '" does not exist.');
     
     // Determine Content-Type based on file extension
     $content_type = get_content_type($file);
-    if ($content_type == NULL) die();
+    if ($content_type == NULL) errordocument(403, 'Invalid content type.');
 
     $mtime = filemtime($file);
 
