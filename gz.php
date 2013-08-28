@@ -165,12 +165,14 @@ function main() {
                 }
                 break;
         }
-        file_put_contents($outfile, $gz ? gzencode($buffer) : $buffer);
+        if ($gz) $buffer = gzencode($buffer);
+        file_put_contents($outfile, $buffer);
     }
+    else $buffer = NULL;
+
     // Send compression headers and use the .gz file instead of the
     // original filename
     if ($gz) header('Content-Encoding: gzip');
-    $file = $outfile;
 
     // Vary max-age and expiration headers based on content type
     switch ($content_type) {
@@ -200,10 +202,18 @@ function main() {
                                       'text/plain')))
         $content_type .= '; charset=' . CHARSET;
     header('Content-Type: ' . $content_type);
-    header('Content-Length: ' . filesize($file));
-    
+    if ($buffer !== NULL) {
+        header('Content-Length: ' . strlen($buffer));
+    }
+    else {
+        header('Content-Length: ' . filesize($outfile));
+    }
+
     // If the request method isn't HEAD, send the file contents
-    if ($_SERVER['REQUEST_METHOD'] != 'HEAD') readfile($file);
+    if ($_SERVER['REQUEST_METHOD'] != 'HEAD') {
+        if ($buffer !== NULL) echo $buffer;
+        else readfile($outfile);
+    }
 }
 
 main();
