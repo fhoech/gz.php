@@ -207,7 +207,11 @@ function main() {
     }
     else {
         header('Content-Length: ' . filesize($outfile));
+        header('X-Last-Modified: ' . gmdate('D, d M Y H:i:s',
+               filemtime($outfile)) . ' GMT');
     }
+    header('X-Original-Filename: ' . basename($file));
+    header('X-Filename: ' . basename($outfile));
 
     // If the request method isn't HEAD, send the file contents
     if ($_SERVER['REQUEST_METHOD'] != 'HEAD') {
