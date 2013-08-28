@@ -1,3 +1,9 @@
+# BEGIN timestamp versioning
+<IfModule mod_rewrite.c>
+RewriteRule ^(.+?)\.timestamp-\d+\.(\w+)$ $1.$2 [L]
+</IfModule>
+# END timestamp versioning
+
 # BEGIN GZIP
 <IfModule mod_rewrite.c>
 ## If the user agent accepts gzip encoding...
