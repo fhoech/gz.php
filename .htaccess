@@ -17,7 +17,7 @@ RewriteCond %{HTTP:Accept-Encoding} gzip
 # ...and the requested file exists...
 RewriteCond %{REQUEST_FILENAME} -f
 # ...then use a PHP script to serve a compressed version. Done.
-RewriteRule \.(css|htm|html|ico|js|json|svg|txt|xml)$ /gz.php [L]
+RewriteRule \.(css|html?|ico|js|json|svg|txt|xml)$ /gz.php [L]
 # Or if a minified version of the requested file exists (<file>.min)...
 RewriteCond %{REQUEST_FILENAME}.min -f
 # ...then serve the minified file. Done.
