@@ -96,7 +96,7 @@ function main() {
     $file = dirname(__FILE__) . $path;
 
     // Handle timestamp versioning
-    $file = preg_replace('/^(.+?)\.timestamp-\d+\.(\w+)$/', '$1.$2', $file);
+    if (!file_exists($file)) $file = preg_replace('/^(.+?)\.timestamp-\d+\.(\w+)$/', '$1.$2', $file);
 
     if (!file_exists($file)) errordocument(404, 'The file "' . $path . '" does not exist.');
     
