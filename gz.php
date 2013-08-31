@@ -33,6 +33,7 @@
  */
 
 define('CHARSET', 'utf-8');
+define('PHP_IN_FILENAME_WORKAROUND', true);
 
 function get_content_type($file) {
     // Determine Content-Type based on file extension
@@ -123,7 +124,14 @@ function main() {
 
     // Only write the compressed version if it does not yet exist or the
     // original file has changed
-    $outfile = $file . ($gz ? '.gz' : '.min');
+    // Special case: Some servers always return a file as text/html when
+    // the filename contains the string '.php.', in that case we do *not*
+    // store a gz compressed version because it will be served as text/html
+    // if accessed directly (or indirectly via mod_rewrite) on such servers
+    $php_in_filename_workaround = (strpos($file, '.php.') !== false &&
+                                   defined('PHP_IN_FILENAME_WORKAROUND') &&
+                                   PHP_IN_FILENAME_WORKAROUND);
+    $outfile = $file . ($gz && !$php_in_filename_workaround ? '.gz' : '.min');
     if (!file_exists($outfile) || filemtime($outfile) < $mtime) {
         $buffer = file_get_contents($file);
         if (preg_match_all('/<!--#include file="([^"]+)" -->/',
@@ -170,14 +178,13 @@ function main() {
                 }
                 break;
         }
-        if ($gz) $buffer = gzencode($buffer);
+        if ($gz && !$php_in_filename_workaround) $buffer = gzencode($buffer);
         file_put_contents($outfile, $buffer);
     }
     else $buffer = NULL;
 
-    // Send compression headers and use the .gz file instead of the
-    // original filename
-    if ($gz) header('Content-Encoding: gzip');
+    // Send compression headers
+    if ($gz && !$php_in_filename_workaround) header('Content-Encoding: gzip');
 
     // Vary max-age and expiration headers based on content type
     switch ($content_type) {
