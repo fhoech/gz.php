@@ -13,6 +13,47 @@
 # END timestamp versioning
 
 # BEGIN GZIP
+# Force content type for known extensions
+<FilesMatch "\.css\.gz$">
+    ForceType text/css
+</FilesMatch>
+<FilesMatch "\.html?\.gz$">
+    ForceType text/html
+</FilesMatch>
+<FilesMatch "\.ico\.gz$">
+    ForceType image/x-icon
+</FilesMatch>
+<FilesMatch "\.js\.gz$">
+    ForceType application/javascript
+</FilesMatch>
+<FilesMatch "\.json\.gz$">
+    ForceType application/json
+</FilesMatch>
+<FilesMatch "\.svg\.gz$">
+    ForceType image/svg+xml
+</FilesMatch>
+<FilesMatch "\.txt\.gz$">
+    ForceType text/plain
+</FilesMatch>
+<FilesMatch "\.xml\.gz$">
+    ForceType application/xml
+</FilesMatch>
+
+# Set 'Vary' response header for .gz files
+<FilesMatch "\.gz$">
+    <IfModule mod_headers.c>
+        Header always append Vary "Accept-Encoding"
+    </IfModule>
+</FilesMatch>
+
+# Set encoding for .gz files
+<IfModule mod_mime.c>
+    # http://httpd.apache.org/docs/2.2/mod/mod_mime.html#addencoding:
+    # "To make this long story short, you should always use x-gzip and x-compress
+    # for these two specific encodings"
+    AddEncoding x-gzip .gz
+</IfModule>
+
 <IfModule mod_rewrite.c>
     ## If the user agent accepts gzip encoding...
     #RewriteCond %{HTTP:Accept-Encoding} gzip
