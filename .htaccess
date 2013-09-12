@@ -1,16 +1,11 @@
+# Minimal .htaccess file containing just the rules for gz.php and serving
+# static .gz/.min files
+
 # Turn on rewrite engine
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
 </IfModule>
-
-# BEGIN timestamp versioning
-<IfModule mod_rewrite.c>
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.+?)\.timestamp-\d+\.(\w+)$ $1.$2 [L]
-</IfModule>
-# END timestamp versioning
 
 # BEGIN GZIP
 # Force content type for known extensions

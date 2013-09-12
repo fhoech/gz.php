@@ -100,7 +100,6 @@ function main() {
 
     // Handle timestamp versioning
     if (!file_exists($file)) $file = preg_replace('/^(.+?)\.\d+\.(js|css|png|jpg|gif)$/', '$1.$2', $file);
-    if (!file_exists($file)) $file = preg_replace('/^(.+?)\.timestamp-\d+\.(\w+)$/', '$1.$2', $file);
 
     if (!file_exists($file)) errordocument(404, 'The file "' . $path . '" does not exist.');
     
