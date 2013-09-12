@@ -32,8 +32,9 @@
  * @version     $Id$
  */
 
-define('CHARSET', 'utf-8');
-define('PHP_IN_FILENAME_WORKAROUND', true);
+@include dirname(__FILE__) . '/gz.config.inc.php';
+if (!defined('CHARSET')) define('CHARSET', 'utf-8');
+if (!defined('PHP_IN_FILENAME_WORKAROUND')) define('PHP_IN_FILENAME_WORKAROUND', true);
 
 function get_content_type($file) {
     // Determine Content-Type based on file extension
