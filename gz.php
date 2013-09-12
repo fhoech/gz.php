@@ -201,6 +201,7 @@ function main() {
         }
         if ($gz && !$php_in_filename_workaround) $buffer = gzencode($buffer);
         file_put_contents($outfile, $buffer);
+        touch($outfile, $mtime);
     }
     else $buffer = NULL;
 
