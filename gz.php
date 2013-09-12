@@ -110,10 +110,29 @@ function main() {
 
     $mtime = filemtime($file);
 
+    // Vary max-age and expiration headers based on content type
+    switch ($content_type) {
+        case 'image/gif':
+        case 'image/jpeg':
+        case 'image/png':
+        case 'image/svg+xml':
+            // Max-age for images: 31 days
+            $maxage = 60 * 60 * 24 * 31;
+            break;
+        default:
+            // Max-age for everything else: 7 days
+            $maxage = 60 * 60 * 24 * 7;
+    }
+
+    // Send vary and cache control headers
+    header('Vary: Accept-Encoding');
+    header('Cache-Control: max-age=' . $maxage);
+    header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $maxage) . ' GMT');
+
     // If the user agent sent a IF_MODIFIED_SINCE header, check if the file
     // has been modified. If it hasn't, send '304 Not Modified' header & exit
     if (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE']) &&
-        $mtime <= strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+        $mtime <= strtotime(preg_replace('/;.*$/', '', $_SERVER['HTTP_IF_MODIFIED_SINCE']))) {
         header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified', true, 304);
         exit;
     }
@@ -188,24 +207,7 @@ function main() {
     // Send compression headers
     if ($gz && !$php_in_filename_workaround) header('Content-Encoding: gzip');
 
-    // Vary max-age and expiration headers based on content type
-    switch ($content_type) {
-        case 'image/gif':
-        case 'image/jpeg':
-        case 'image/png':
-        case 'image/svg+xml':
-            // Max-age for images: 31 days
-            $maxage = 60 * 60 * 24 * 31;
-            break;
-        default:
-            // Max-age for everything else: 7 days
-            $maxage = 60 * 60 * 24 * 7;
-    }
-
     // Send remaining headers
-    header('Vary: Accept-Encoding');
-    header('Cache-Control: max-age=' . $maxage);
-    header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $maxage) . ' GMT');
     header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
     if (in_array($content_type, array('application/javascript',
                                       'application/json',
