@@ -14,7 +14,7 @@
 
 # BEGIN GZIP
 # Force content type for known extensions
-<FilesMatch "\.css\.gz$">
+<FilesMatch "\.css\.(gz|min)$">
     ForceType text/css
 </FilesMatch>
 <FilesMatch "\.html?\.gz$">
@@ -23,7 +23,7 @@
 <FilesMatch "\.ico\.gz$">
     ForceType image/x-icon
 </FilesMatch>
-<FilesMatch "\.js\.gz$">
+<FilesMatch "\.js\.(gz|min)$">
     ForceType application/javascript
 </FilesMatch>
 <FilesMatch "\.json\.gz$">
@@ -40,7 +40,7 @@
 </FilesMatch>
 
 # Set 'Vary' response header for .gz files and files that can be compressed
-<FilesMatch "\.(gz|css|html?|ico|js|json|svg|txt|xml)$">
+<FilesMatch "\.(gz|min|css|html?|ico|js|json|svg|txt|xml)$">
     <IfModule mod_headers.c>
         Header always append Vary "Accept-Encoding"
     </IfModule>
