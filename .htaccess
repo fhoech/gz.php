@@ -39,8 +39,8 @@
     ForceType application/xml
 </FilesMatch>
 
-# Set 'Vary' response header for .gz files
-<FilesMatch "\.gz$">
+# Set 'Vary' response header for .gz files and files that can be compressed
+<FilesMatch "\.(gz|css|html?|ico|js|json|svg|txt|xml)$">
     <IfModule mod_headers.c>
         Header always append Vary "Accept-Encoding"
     </IfModule>
