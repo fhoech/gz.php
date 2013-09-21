@@ -50,25 +50,32 @@
 </IfModule>
 
 <IfModule mod_rewrite.c>
+    #RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml)$
     ## If the user agent accepts gzip encoding...
     #RewriteCond %{HTTP:Accept-Encoding} gzip
     ## ...and if gzip-encoded version of the requested file exists (<file>.gz)...
     #RewriteCond %{REQUEST_FILENAME}.gz -f
     ## ...then serve the gzip-encoded file. Done.
-    #RewriteRule ^(.+)$ $1.gz [L]
+    #RewriteRule ^ %{REQUEST_URI}.gz [L]
+
+    RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml)$
     # Or if the user agent accepts gzip encoding...
     RewriteCond %{HTTP:Accept-Encoding} gzip
     # ...and the requested file exists...
     RewriteCond %{REQUEST_FILENAME} -f
     # ...then use a PHP script to serve a compressed version. Done.
-    RewriteRule \.(css|html?|ico|js|json|svg|txt|xml)$ /gz.php [L]
+    RewriteRule ^ /gz.php [L]
+
+    RewriteCond %{REQUEST_URI} \.(css|js)$
     # Or if a minified version of the requested file exists (<file>.min)...
     RewriteCond %{REQUEST_FILENAME}.min -f
     # ...then serve the minified file. Done.
-    RewriteRule ^(.+)$ $1.min [L]
+    RewriteRule ^ %{REQUEST_URI}.min [L]
+
+    RewriteCond %{REQUEST_URI} \.(css|js)$
     # Or if the requested file exists...
     RewriteCond %{REQUEST_FILENAME} -f
     # ...then use a PHP script serve a minified version. Done.
-    RewriteRule \.(css|js)$ /gz.php [L]
+    RewriteRule ^ /gz.php [L]
 </IfModule>
 # END GZIP
