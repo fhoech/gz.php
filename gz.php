@@ -237,8 +237,13 @@ function main() {
                 break;
             case 'application/javascript':
                 if (strpos($file, 'min.js') === false) {
+                    // Protect conditional compilation comments
+                    $buffer = preg_replace('~/\*@cc_on([\S\s]*?)@\*/~',
+                                           ";'@cc_on@';$1;'@cc_off@';", $buffer);
                     require_once('jsmin.php');
                     $buffer = JSMin::minify($buffer);
+                    $buffer = str_replace(";'@cc_on@';", "/*@cc_on\n", $buffer);
+                    $buffer = str_replace(";'@cc_off@';", "\n@*/", $buffer);
                 }
                 break;
         }
