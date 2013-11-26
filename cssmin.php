@@ -3325,7 +3325,7 @@ class CssConvertLevel3AtKeyframesMinifierFilter extends aCssMinifierFilter
 	public function apply(array &$tokens)
 		{
 		$r = 0;
-		$transformations = array("-moz-keyframes", "-webkit-keyframes");
+		$transformations = array("-moz-keyframes", "-webkit-keyframes", "-o-keyframes");
 		for ($i = 0, $l = count($tokens); $i < $l; $i++)
 			{
 			if (get_class($tokens[$i]) === "CssAtKeyframesStartToken")
@@ -4578,6 +4578,14 @@ class CssAtKeyframesParserPlugin extends aCssParserPlugin
 		elseif ($char === "@" && $state === "T_DOCUMENT" && strtolower(substr($this->parser->getSource(), $index, 18)) === "@-webkit-keyframes")
 			{
 			$this->atRuleName = "-webkit-keyframes";
+			$this->parser->pushState("T_AT_KEYFRAMES::NAME");
+			$this->parser->clearBuffer();
+			return $index + 18;
+			}
+		// Start of @keyframes at-rule block (@-o-keyframes)
+		elseif ($char === "@" && $state === "T_DOCUMENT" && strtolower(substr($this->parser->getSource(), $index, 18)) === "@-o-keyframes")
+			{
+			$this->atRuleName = "-o-keyframes";
 			$this->parser->pushState("T_AT_KEYFRAMES::NAME");
 			$this->parser->clearBuffer();
 			return $index + 18;
