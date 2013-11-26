@@ -127,7 +127,8 @@ function main() {
         else errordocument(403, 'No file path given.');
     }
 
-    $file = dirname(__FILE__) . $path;
+    if (defined('BASE')) $file = BASE . $path;
+    else $file = dirname(__FILE__) . $path;
 
     // Handle timestamp versioning
     if (!file_exists($file)) $file = preg_replace('/^(.+?)\.\d+\.(js|css|png|jpg|gif)$/', '$1.$2', $file);
