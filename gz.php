@@ -86,7 +86,37 @@ function errordocument($status, $message) {
     die();
 }
 
+function replace_with_base64_data_url($match) {
+    global $file;
+    // 1 = 'url("' or "url('"
+    // 2 = '"' or "'"
+    // 3 = URI
+    // 4 = '")' or "')"
+    $img = dirname($file) . '/' . $match[3];
+    $content_type = get_content_type($match[3]);
+    switch ($content_type) {
+        case 'image/gif':
+        case 'image/x-icon':
+        case 'image/png':
+        case 'image/svg+xml':
+            break;
+        default:
+            unset($content_type);
+    }
+    if (!empty($content_type)) {
+        $b64 = @base64_encode(@file_get_contents($img));
+        if (!empty($b64)) {
+            $match[1] = rtrim($match[1], '"\'') . '"';
+            $match[4] = '"' . ltrim($match[4], '"\'');
+        }
+    }
+    return $match[1] . (!empty($b64)
+                        ? 'data:' . $content_type . ';base64,' . $b64
+                        : $match[3]) . $match[4];
+}
+
 function main() {
+    global $file;
     // Get file path by stripping query parameters from the request URI
     if (!empty($_SERVER['REQUEST_URI']))
         $path = preg_replace('/\/?(?:\?.*)?$/', '', $_SERVER['REQUEST_URI']);
@@ -102,7 +132,7 @@ function main() {
     // Handle timestamp versioning
     if (!file_exists($file)) $file = preg_replace('/^(.+?)\.\d+\.(js|css|png|jpg|gif)$/', '$1.$2', $file);
 
-    if (!file_exists($file)) errordocument(404, 'The file "' . $path . '" does not exist.');
+    if (!file_exists($file)) errordocument(404, 'The file "' . $file . '" does not exist.');
     
     // Determine Content-Type based on file extension
     $content_type = get_content_type($file);
@@ -169,11 +199,12 @@ function main() {
                         // Make sure url() paths are correct for CSS files 
                         // included from subfolders
                         $include_path = dirname($set[1]);
-                        // Protect absolute URLs and URLs beginning with '/'
-                        $tmp = preg_replace('/(\burl\(\s*[\'"]?)(http:|https:|\/)/',
+                        // Protect URLs beginning with '/', absolute URLs and
+                        // data URLs
+                        $tmp = preg_replace('/(\burl\(\s*[\'"]?)(data:|http:|https:|\/)/',
                                             "$1\0$2", $tmp);
-                        $tmp = preg_replace('/(\burl\(\s*[\'"]?)([^\0])/',
-                                            '$1' . $include_path . '/$2',
+                        $tmp = preg_replace('/(\burl\(\s*([\'"]?))([^\0]+?)(\2\))/',
+                                            '$1' . $include_path . '/$3$4',
                                             $tmp);
                         $tmp = preg_replace('/(\burl\(\s*[\'"]?)\0/', "$1",
                                             $tmp);
@@ -190,6 +221,17 @@ function main() {
                 if (strpos($file, 'min.css') === false) {
                     require_once('cssmin.php');
                     $buffer = CssMin::minify($buffer);
+                }
+                if (defined('EMBED_GRAPHICS_IN_CSS') && EMBED_GRAPHICS_IN_CSS) {
+                    // Protect URLs beginning with '/', absolute URLs and
+                    // data URLs
+                    $buffer = preg_replace('/(\burl\(\s*[\'"]?)(data:|http:|https:|\/)/',
+                                          "$1\0$2", $buffer);
+                    $buffer = preg_replace_callback('/(\burl\(\s*([\'"]?))([^\0]+?)(\2\))/',
+                                                    'replace_with_base64_data_url',
+                                                    $buffer);
+                    $buffer = preg_replace('/(\burl\(\s*[\'"]?)\0/', "$1",
+                                           $buffer);
                 }
                 break;
             case 'application/javascript':
