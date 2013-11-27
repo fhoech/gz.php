@@ -5,5 +5,6 @@ define('CHARSET', 'utf-8');
 # define('BASE', 'CHANGEME');
 define('PHP_IN_FILENAME_WORKAROUND', true);
 define('EMBED_GRAPHICS_IN_CSS', false);
+define('MINIFY', true);
 
 ?>

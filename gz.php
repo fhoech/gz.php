@@ -217,7 +217,7 @@ function main() {
             }
         }
         // Minify CSS and JS if the filename does not contain 'min.<ext>'
-        switch ($content_type) {
+        if (defined('MINIFY') && MINIFY) switch ($content_type) {
             case 'text/css':
                 if (strpos($file, 'min.css') === false) {
                     require_once('cssmin.php');
