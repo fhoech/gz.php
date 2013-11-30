@@ -221,7 +221,23 @@ function main() {
             case 'text/css':
                 if (strpos($file, 'min.css') === false) {
                     require_once('cssmin.php');
-                    $buffer = CssMin::minify($buffer);
+                    $filters = array('ImportImports'                 => false,
+                                     'RemoveComments'                => true, 
+                                     'RemoveEmptyRulesets'           => true,
+                                     'RemoveEmptyAtBlocks'           => true,
+                                     'ConvertLevel3AtKeyframes'      => false,
+                                     'ConvertLevel3Properties'       => false,
+                                     'Variables'                     => true,
+                                     'RemoveLastDelarationSemiColon' => true);
+                    $plugins = array('Variables'                     => true,
+                                     'ConvertFontWeight'             => false,
+                                     'ConvertHslColors'              => false,
+                                     'ConvertRgbColors'              => false,
+                                     'ConvertNamedColors'            => false,
+                                     'CompressColorValues'           => true,
+                                     'CompressUnitValues'            => true,
+                                     'CompressExpressionValues'      => false);
+                    $buffer = CssMin::minify($buffer, $filters, $plugins);
                 }
                 if (defined('EMBED_GRAPHICS_IN_CSS') && EMBED_GRAPHICS_IN_CSS) {
                     // Protect URLs beginning with '/', absolute URLs and
