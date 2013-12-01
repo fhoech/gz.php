@@ -105,12 +105,14 @@ function replace_with_base64_data_url($match) {
     }
     if (!empty($content_type)) {
         $b64 = @base64_encode(@file_get_contents($img));
-        if (!empty($b64)) {
+        // IE 8 has a 32KB limit for data URLs
+        $use_b64 = !empty($b64) && strlen($b64) < 1024 * 32;
+        if ($use_b64) {
             $match[1] = rtrim($match[1], '"\'') . '"';
             $match[4] = '"' . ltrim($match[4], '"\'');
         }
     }
-    return $match[1] . (!empty($b64)
+    return $match[1] . ($use_b64
                         ? 'data:' . $content_type . ';base64,' . $b64
                         : $match[3]) . $match[4];
 }
