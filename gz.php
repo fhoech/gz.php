@@ -237,7 +237,7 @@ function main() {
                                      'ConvertRgbColors'              => false,
                                      'ConvertNamedColors'            => false,
                                      'CompressColorValues'           => true,
-                                     'CompressUnitValues'            => true,
+                                     'CompressUnitValues'            => false,
                                      'CompressExpressionValues'      => false);
                     $buffer = CssMin::minify($buffer, $filters, $plugins);
                 }
