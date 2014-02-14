@@ -106,8 +106,8 @@ ErrorDocument 404 /404.html
     Header set X-UA-Compatible "IE=edge"
     # `mod_headers` can't match based on the content-type, however, we only
     # want to send this header for HTML pages and not for the other resources
-  # <FilesMatch "\.(appcache|crx|css|eot|gif|htc|ico|jpe?g|js|m4a|m4v|manifest|mp4|oex|oga|ogg|ogv|otf|pdf|png|safariextz|svgz?|ttf|vcf|webapp|webm|webp|woff|xml|xpi)$">
-    <FilesMatch "\.(appcache|crx|css(\.min)?|eot|gif|htc|ico|jpe?g|js(\.min)?|m4a|m4v|manifest|mp4|oex|oga|ogg|ogv|otf|pdf|png|safariextz|svgz?|ttf|vcf|webapp|webm|webp|woff|xml|xpi)(\.gz)?$">
+  # <FilesMatch "\.(appcache|crx|css|eot|gif|htc|ico|jpe?g|js|m4a|m4v|manifest|mp4|oex|oga|ogg|ogv|otf|pdf|png|safariextz|svgz?|ttf|vcf|webapp|webm|webp|woff|xml|xsl|xpi)$">
+    <FilesMatch "\.(appcache|crx|css(\.min)?|eot|gif|htc|ico|jpe?g|js(\.min)?|m4a|m4v|manifest|mp4|oex|oga|ogg|ogv|otf|pdf|png|safariextz|svgz?|ttf|vcf|webapp|webm|webp|woff|xml|xsl|xpi)(\.gz)?$">
         Header unset X-UA-Compatible
     </FilesMatch>
 </IfModule>
@@ -184,6 +184,7 @@ ErrorDocument 404 /404.html
     AddType application/x-web-app-manifest+json         webapp
     AddType application/x-xpinstall                     xpi
     AddType application/xml                             atom rdf rss xml
+    AddType application/xslt+xml                        xsl
     AddType image/webp                                  webp
     AddType image/x-icon                                ico
     AddType text/cache-manifest                         appcache manifest
@@ -203,7 +204,7 @@ AddDefaultCharset utf-8
 # Force UTF-8 for certain file formats.
 <IfModule mod_mime.c>
   # AddCharset utf-8 .atom .css .js .json .rss .vtt .webapp .xml
-    AddCharset utf-8 .atom .css .js .json .rss .vtt .webapp .xml .css.gz .css.min .js.gz .js.min
+    AddCharset utf-8 .atom .css .js .json .rss .vtt .webapp .xml .css.gz .css.min .js.gz .js.min .xml.gz .xsl .xsl.gz
 </IfModule>
 
 
@@ -297,7 +298,7 @@ AddDefaultCharset utf-8
 
 # <IfModule mod_headers.c>
 #    Header set Content-Security-Policy "script-src 'self'; object-src 'self'"
-#    <FilesMatch "\.(appcache|crx|css|eot|gif|htc|ico|jpe?g|js|m4a|m4v|manifest|mp4|oex|oga|ogg|ogv|otf|pdf|png|safariextz|svgz?|ttf|vcf|webapp|webm|webp|woff|xml|xpi)$">
+#    <FilesMatch "\.(appcache|crx|css|eot|gif|htc|ico|jpe?g|js|m4a|m4v|manifest|mp4|oex|oga|ogg|ogv|otf|pdf|png|safariextz|svgz?|ttf|vcf|webapp|webm|webp|woff|xml|xsl|xpi)$">
 #        Header unset Content-Security-Policy
 #    </FilesMatch>
 # </IfModule>
@@ -417,6 +418,7 @@ AddDefaultCharset utf-8
 #                                     application/x-web-app-manifest+json \
 #                                     application/xhtml+xml \
 #                                     application/xml \
+#                                     application/xslt+xml \
 #                                     font/opentype \
 #                                     image/svg+xml \
 #                                     image/x-icon \
@@ -473,6 +475,7 @@ FileETag None
   # Data interchange
     ExpiresByType application/json                      "access plus 0 seconds"
     ExpiresByType application/xml                       "access plus 0 seconds"
+    ExpiresByType application/xslt+xml                  "access plus 1 week"
     ExpiresByType text/xml                              "access plus 0 seconds"
 
   # Favicon (cannot be renamed!)
@@ -600,9 +603,12 @@ FileETag None
 <FilesMatch "\.xml\.gz$">
     ForceType application/xml
 </FilesMatch>
+<FilesMatch "\.xsl\.gz$">
+    ForceType application/xslt+xml
+</FilesMatch>
 
 # Set 'Vary' response header for .gz files and files that can be compressed
-<FilesMatch "\.(gz|min|css|html?|ico|js|json|svg|txt|xml)$">
+<FilesMatch "\.(gz|min|css|html?|ico|js|json|svg|txt|xml|xsl)$">
     <IfModule mod_headers.c>
         Header always append Vary "Accept-Encoding"
     </IfModule>
@@ -617,7 +623,7 @@ FileETag None
 </IfModule>
 
 <IfModule mod_rewrite.c>
-    #RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml)$
+    #RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml|xsl)$
     ## If the user agent accepts gzip encoding...
     #RewriteCond %{HTTP:Accept-Encoding} gzip
     ## ...and if gzip-encoded version of the requested file exists (<file>.gz)...
@@ -625,7 +631,7 @@ FileETag None
     ## ...then serve the gzip-encoded file. Done.
     #RewriteRule ^ %{REQUEST_URI}.gz [L]
 
-    RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml)$
+    RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml|xsl)$
     # Or if the user agent accepts gzip encoding...
     RewriteCond %{HTTP:Accept-Encoding} gzip
     # ...and the requested file exists...

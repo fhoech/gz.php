@@ -33,9 +33,12 @@
 <FilesMatch "\.xml\.gz$">
     ForceType application/xml
 </FilesMatch>
+<FilesMatch "\.xsl\.gz$">
+    ForceType application/xslt+xml
+</FilesMatch>
 
 # Set 'Vary' response header for .gz files and files that can be compressed
-<FilesMatch "\.(gz|min|css|html?|ico|js|json|svg|txt|xml)$">
+<FilesMatch "\.(gz|min|css|html?|ico|js|json|svg|txt|xml|xsl)$">
     <IfModule mod_headers.c>
         Header always append Vary "Accept-Encoding"
     </IfModule>
@@ -50,7 +53,7 @@
 </IfModule>
 
 <IfModule mod_rewrite.c>
-    #RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml)$
+    #RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml|xsl)$
     ## If the user agent accepts gzip encoding...
     #RewriteCond %{HTTP:Accept-Encoding} gzip
     ## ...and if gzip-encoded version of the requested file exists (<file>.gz)...
@@ -58,7 +61,7 @@
     ## ...then serve the gzip-encoded file. Done.
     #RewriteRule ^ %{REQUEST_URI}.gz [L]
 
-    RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml)$
+    RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml|xsl)$
     # Or if the user agent accepts gzip encoding...
     RewriteCond %{HTTP:Accept-Encoding} gzip
     # ...and the requested file exists...

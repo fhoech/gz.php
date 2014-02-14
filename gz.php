@@ -51,7 +51,8 @@ function get_content_type($file) {
                            'png' => 'image/png',
                            'svg' => 'image/svg+xml',
                            'txt' => 'text/plain',
-                           'xml' => 'application/xml');
+                           'xml' => 'application/xml',
+                           'xsl' => 'application/xslt+xml');
     if (empty($content_types[$info['extension']]))
         return NULL;
     return $content_types[$info['extension']];
