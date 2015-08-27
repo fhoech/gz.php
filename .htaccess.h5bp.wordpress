@@ -643,19 +643,19 @@ FileETag None
     # ...and the requested file exists...
     RewriteCond %{REQUEST_FILENAME} -f
     # ...then use a PHP script to serve a compressed version. Done.
-    RewriteRule ^ /gz.php [L]
+    RewriteRule ^ /gz.php [L,E=REQUEST_URI:%{REQUEST_URI}]
 
-    RewriteCond %{REQUEST_URI} \.(css|js)$
-    # Or if a minified version of the requested file exists (<file>.min)...
-    RewriteCond %{REQUEST_FILENAME}.min -f
-    # ...then serve the minified file. Done.
-    RewriteRule ^ %{REQUEST_URI}.min [L]
+    #RewriteCond %{REQUEST_URI} \.(css|js)$
+    ## Or if a minified version of the requested file exists (<file>.min)...
+    #RewriteCond %{REQUEST_FILENAME}.min -f
+    ## ...then serve the minified file. Done.
+    #RewriteRule ^ %{REQUEST_URI}.min [L]
 
     RewriteCond %{REQUEST_URI} \.(css|js)$
     # Or if the requested file exists...
     RewriteCond %{REQUEST_FILENAME} -f
     # ...then use a PHP script serve a minified version. Done.
-    RewriteRule ^ /gz.php [L]
+    RewriteRule ^ /gz.php [L,E=REQUEST_URI:%{REQUEST_URI}]
 </IfModule>
 # END GZIP
 

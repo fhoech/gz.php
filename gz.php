@@ -87,6 +87,18 @@ function errordocument($status, $message) {
     die();
 }
 
+function get_redirect_envvar($name) {
+    $prefix = 'REDIRECT_';
+    foreach ($_SERVER as $key => $value) {
+        if (substr($key, 0, strlen($prefix)) == $prefix) {
+            if (substr($key, -strlen($name)) == $name)
+                return $value;
+        }
+    }
+    if (array_key_exists($name, $_SERVER)) return $_SERVER[$name];
+    return null;
+}
+
 function replace_with_base64_data_url($match) {
     global $file;
     // 1 = 'url("' or "url('"
@@ -120,9 +132,11 @@ function replace_with_base64_data_url($match) {
 
 function main() {
     global $file;
+    // Get (redirected) request URI
+    $redirect_request_uri = get_redirect_envvar('REQUEST_URI');
     // Get file path by stripping query parameters from the request URI
-    if (!empty($_SERVER['REQUEST_URI']))
-        $path = preg_replace('/\/?(?:\?.*)?$/', '', $_SERVER['REQUEST_URI']);
+    if (!empty($redirect_request_uri))
+        $path = preg_replace('/\/?(?:\?.*)?$/', '', $redirect_request_uri);
 
     // If the path is empty, either use DEFAULT_FILENAME if defined, or exit
     if (empty($path)) {
@@ -136,7 +150,7 @@ function main() {
     // Handle timestamp versioning
     if (!file_exists($file)) $file = preg_replace('/^(.+?)\.\d+\.(js|css|png|jpg|gif)$/', '$1.$2', $file);
 
-    if (!file_exists($file)) errordocument(404, 'The file "' . $file . '" does not exist.');
+    if (!file_exists($file)) errordocument(404, 'The file "' . $path . '" does not exist.');
     
     // Determine Content-Type based on file extension
     $content_type = get_content_type($file);
