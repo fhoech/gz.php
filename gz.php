@@ -33,6 +33,8 @@
  */
 
 @include dirname(__FILE__) . '/gz.config.inc.php';
+if (!defined('BASE')) define('BASE', dirname(__FILE__));
+if (!defined('CACHE')) define('CACHE', BASE . '/gz-cache');
 if (!defined('CHARSET')) define('CHARSET', 'utf-8');
 if (!defined('PHP_IN_FILENAME_WORKAROUND')) define('PHP_IN_FILENAME_WORKAROUND', true);
 
@@ -56,6 +58,17 @@ function get_content_type($file) {
     if (empty($content_types[$info['extension']]))
         return NULL;
     return $content_types[$info['extension']];
+}
+
+function get_error_type($type) {
+    switch ($type) {
+        case E_WARNING:
+            return 'Warning';
+        case E_NOTICE:
+            return 'Notice';
+        default:
+            return 'Error';
+    }
 }
 
 function errordocument($status, $message) {
@@ -130,27 +143,34 @@ function replace_with_base64_data_url($match) {
                         : $match[3]) . $match[4];
 }
 
+function send_php_error_header($custom_message=null) {
+    $last_error = error_get_last();
+    header('X-PHP-' . get_error_type($last_error['type']) . ': ' .
+           $last_error['message'] . ($custom_message != null ? ' ' . $custom_message : '') . ' in ' . $last_error['file'] .
+           ' on line ' . $last_error['line'], false);
+}
+
 function main() {
     global $file;
     // Get (redirected) request URI
     $redirect_request_uri = get_redirect_envvar('REQUEST_URI');
     // Get file path by stripping query parameters from the request URI
     if (!empty($redirect_request_uri))
-        $path = preg_replace('/\/?(?:\?.*)?$/', '', $redirect_request_uri);
+        $file_path = preg_replace('/\/?(?:\?.*)?$/', '', $redirect_request_uri);
 
     // If the path is empty, either use DEFAULT_FILENAME if defined, or exit
-    if (empty($path)) {
-        if (defined('DEFAULT_FILENAME')) $path = '/' . DEFAULT_FILENAME;
+    if (empty($file_path)) {
+        if (defined('DEFAULT_FILENAME')) $file_path = '/' . DEFAULT_FILENAME;
         else errordocument(403, 'No file path given.');
     }
 
-    if (defined('BASE')) $file = BASE . $path;
-    else $file = dirname(__FILE__) . $path;
+    $file = BASE . $file_path;
+    $outfile = CACHE . $file_path;
 
     // Handle timestamp versioning
     if (!file_exists($file)) $file = preg_replace('/^(.+?)\.\d+\.(js|css|png|jpg|gif)$/', '$1.$2', $file);
 
-    if (!file_exists($file)) errordocument(404, 'The file "' . $path . '" does not exist.');
+    if (!file_exists($file)) errordocument(404, 'The file "' . $file_path . '" does not exist.');
     
     // Determine Content-Type based on file extension
     $content_type = get_content_type($file);
@@ -200,7 +220,7 @@ function main() {
     $php_in_filename_workaround = (strpos($file, '.php.') !== false &&
                                    defined('PHP_IN_FILENAME_WORKAROUND') &&
                                    PHP_IN_FILENAME_WORKAROUND);
-    $outfile = $file . ($gz && !$php_in_filename_workaround ? '.gz' : '.min');
+    $outfile .= ($gz && !$php_in_filename_workaround ? '.gz' : '.min');
     if (!file_exists($outfile) || filemtime($outfile) < $mtime) {
         $buffer = file_get_contents($file);
         if (preg_match_all('/<!--#include file="([^"]+)" -->/',
@@ -281,8 +301,10 @@ function main() {
                 break;
         }
         if ($gz && !$php_in_filename_workaround) $buffer = gzencode($buffer);
-        file_put_contents($outfile, $buffer);
-        touch($outfile, $mtime);
+        $outdir = dirname($outfile);
+        if (!is_dir($outdir) && !@mkdir($outdir, 0755, true)) send_php_error_header($outdir);
+        else if (@file_put_contents($outfile, $buffer) === false) send_php_error_header();
+        else if (!@chmod($outfile, 0644) || !@touch($outfile, $mtime)) send_php_error_header();
     }
     else $buffer = NULL;
 
@@ -308,8 +330,8 @@ function main() {
         header('X-Last-Modified: ' . gmdate('D, d M Y H:i:s',
                filemtime($outfile)) . ' GMT');
     }
-    header('X-Original-Filename: ' . basename($file));
-    header('X-Filename: ' . basename($outfile));
+    header('X-Original-Filename: ' . substr($file, strlen(BASE)));
+    header('X-Filename: ' . substr($outfile, strlen(BASE)));
 
     // If the request method isn't HEAD, send the file contents
     if ($_SERVER['REQUEST_METHOD'] != 'HEAD') {
