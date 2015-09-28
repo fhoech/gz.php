@@ -11,9 +11,9 @@ define('CHARSET', 'utf-8');
 # Where to store cached files. Note that the request URI (without query string)
 # is always appended.
 # Option 1 (default): Store cached files in dedicated cache folder.
-# define('CACHE', BASE . '/gz-cache')
+# define('CACHE', BASE . '/gz-cache');
 # Option 2: Store cached files next to original.
-# define('CACHE', BASE)
+# define('CACHE', BASE);
 
 # Some servers always return a file as text/html when
 # the filename contains the string '.php.', in that case it is *not*
