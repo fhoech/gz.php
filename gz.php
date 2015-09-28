@@ -34,6 +34,7 @@
 
 @include dirname(__FILE__) . '/gz.config.inc.php';
 if (!defined('BASE')) define('BASE', dirname(__FILE__));
+if (!defined('DEFAULT_FILENAME')) define('DEFAULT_FILENAME', 'index.html');
 if (!defined('CACHE')) define('CACHE', BASE . '/gz-cache');
 if (!defined('CHARSET')) define('CHARSET', 'utf-8');
 if (!defined('PHP_IN_FILENAME_WORKAROUND')) define('PHP_IN_FILENAME_WORKAROUND', true);

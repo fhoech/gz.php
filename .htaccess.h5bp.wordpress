@@ -629,6 +629,9 @@ FileETag None
 </IfModule>
 
 <IfModule mod_rewrite.c>
+    # STATIC CACHING, gzip-encoded file next to original
+    # ONLY uncomment this if you plan to MANUALLY delete cached *.gz files
+    # after originals are changed!
     #RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml|xsl)$
     ## If the user agent accepts gzip encoding...
     #RewriteCond %{HTTP:Accept-Encoding} gzip
@@ -637,20 +640,45 @@ FileETag None
     ## ...then serve the gzip-encoded file. Done.
     #RewriteRule ^ %{REQUEST_URI}.gz [L]
 
+    # STATIC CACHING, gzip-encoded file in gz-cache folder
+    # ONLY uncomment this if you plan to MANUALLY delete cached *.gz files
+    # after originals are changed!
+    #RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml|xsl)$
+    ## If the user agent accepts gzip encoding...
+    #RewriteCond %{HTTP:Accept-Encoding} gzip
+    ## ...and if gzip-encoded version of the requested file exists (<file>.gz)...
+    #RewriteCond %{DOCUMENT_ROOT}/gz-cache%{REQUEST_URI}.gz -f
+    ## ...then serve the gzip-encoded file. Done.
+    #RewriteRule ^ /gz-cache%{REQUEST_URI}.gz [L]
+
+    # DYNAMIC CACHING. NEVER COMMENT THIS OUT!
     RewriteCond %{REQUEST_URI} \.(css|html?|ico|js|json|svg|txt|xml|xsl)$
-    # Or if the user agent accepts gzip encoding...
+    # If the user agent accepts gzip encoding...
     RewriteCond %{HTTP:Accept-Encoding} gzip
     # ...and the requested file exists...
     RewriteCond %{REQUEST_FILENAME} -f
     # ...then use a PHP script to serve a compressed version. Done.
     RewriteRule ^ /gz.php [L,E=REQUEST_URI:%{REQUEST_URI}]
 
+    # STATIC CACHING (MINIFICATION ONLY), minified file next to original
+    # ONLY uncomment this if you plan to MANUALLY delete cached *.min files
+    # after originals are changed!
     #RewriteCond %{REQUEST_URI} \.(css|js)$
-    ## Or if a minified version of the requested file exists (<file>.min)...
+    ## If a minified version of the requested file exists (<file>.min)...
     #RewriteCond %{REQUEST_FILENAME}.min -f
     ## ...then serve the minified file. Done.
     #RewriteRule ^ %{REQUEST_URI}.min [L]
 
+    # STATIC CACHING (MINIFICATION ONLY), minified file in gz-cache folder
+    # ONLY uncomment this if you plan to MANUALLY delete cached *.min files
+    # after originals are changed!
+    #RewriteCond %{REQUEST_URI} \.(css|js)$
+    ## If a minified version of the requested file exists (<file>.min)...
+    #RewriteCond %{DOCUMENT_ROOT}/gz-cache%{REQUEST_URI}.min -f
+    ## ...then serve the minified file. Done.
+    #RewriteRule ^ /gz-cache%{REQUEST_URI}.min [L]
+
+    # DYNAMIC CACHING (MINIFICATION ONLY)
     RewriteCond %{REQUEST_URI} \.(css|js)$
     # Or if the requested file exists...
     RewriteCond %{REQUEST_FILENAME} -f
