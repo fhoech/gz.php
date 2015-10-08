@@ -144,8 +144,14 @@ function replace_with_base64_data_url($match) {
                         : $match[3]) . $match[4];
 }
 
-function send_php_error_header($custom_message=null) {
-    $last_error = error_get_last();
+function send_php_error_header($last_error=null, $custom_message=null) {
+    if (!defined('DEBUG') || !DEBUG) return;
+    if ($last_error === null) $last_error = error_get_last();
+    else if (is_a($last_error, Exception))
+        $last_error = array('type' => E_ERROR,
+                            'message' => get_class($last_error) . ': ' . $last_error -> getMessage(),
+                            'line' => $last_error -> getLine(),
+                            'file' => $last_error -> getFile());
     header('X-PHP-' . get_error_type($last_error['type']) . ': ' .
            $last_error['message'] . ($custom_message != null ? ' ' . $custom_message : '') . ' in ' . $last_error['file'] .
            ' on line ' . $last_error['line'], false);
@@ -275,7 +281,12 @@ function main() {
                                      'CompressColorValues'           => true,
                                      'CompressUnitValues'            => false,
                                      'CompressExpressionValues'      => false);
-                    $buffer = CssMin::minify($buffer, $filters, $plugins);
+                    try {
+                        $buffer = CssMin::minify($buffer, $filters, $plugins);
+                    }
+                    catch (Exception $exception) {
+                        send_php_error_header($exception);
+                    }
                 }
                 if (defined('EMBED_GRAPHICS_IN_CSS') && EMBED_GRAPHICS_IN_CSS) {
                     // Protect URLs beginning with '/', absolute URLs and
@@ -295,15 +306,24 @@ function main() {
                     $buffer = preg_replace('~/\*@cc_on([\S\s]*?)@\*/~',
                                            ";'@cc_on@';$1;'@cc_off@';", $buffer);
                     require_once('jsmin.php');
-                    $buffer = JSMin::minify($buffer);
+                    try {
+                        $buffer = JSMin::minify($buffer);
+                    }
+                    catch (Exception $exception) {
+                        send_php_error_header($exception);
+                    }
                     $buffer = str_replace(";'@cc_on@';", "/*@cc_on\n", $buffer);
                     $buffer = str_replace(";'@cc_off@';", "\n@*/", $buffer);
                 }
                 break;
         }
-        if ($gz && !$php_in_filename_workaround) $buffer = gzencode($buffer);
+        if ($gz && !$php_in_filename_workaround) {
+            $outbuffer = gzencode($buffer);
+            if ($outbuffer === false) send_php_error_header();
+            else $buffer = &$outbuffer;
+        }
         $outdir = dirname($outfile);
-        if (!is_dir($outdir) && !@mkdir($outdir, 0755, true)) send_php_error_header($outdir);
+        if (!is_dir($outdir) && !@mkdir($outdir, 0755, true)) send_php_error_header(null, $outdir);
         else if (@file_put_contents($outfile, $buffer) === false) send_php_error_header();
         else if (!@chmod($outfile, 0644) || !@touch($outfile, $mtime)) send_php_error_header();
     }
