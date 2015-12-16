@@ -170,6 +170,8 @@ function main() {
         if (defined('DEFAULT_FILENAME')) $file_path = '/' . DEFAULT_FILENAME;
         else errordocument(403, 'No file path given.');
     }
+    
+    if (defined('REWRITEBASE')) $file_path = preg_replace('/^' . preg_quote(REWRITEBASE, '/') . '/', '/', $file_path);
 
     $file = BASE . $file_path;
     $outfile = CACHE . $file_path;

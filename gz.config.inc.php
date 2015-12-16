@@ -8,6 +8,9 @@ define('CHARSET', 'utf-8');
 # Adjust this if gz.php is not stored in the root of your site.
 define('BASE', dirname(__FILE__));
 
+# Adjust this if rewrite base is not '/'
+# define('REWRITEBASE', '/');
+
 # Where to store cached files. Note that the request URI (without query string)
 # is always appended.
 # Option 1 (default): Store cached files in dedicated cache folder.
