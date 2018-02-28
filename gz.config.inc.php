@@ -32,4 +32,7 @@ define('MINIFY', true);
 # Send any PHP errors related to encoding, filesystem or minification as X-PHP-* header
 define('DEBUG', false);
 
+# Exlude the following files from minification. Host-relative paths.
+# $excludes = [];
+
 ?>

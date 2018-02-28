@@ -158,7 +158,7 @@ function send_php_error_header($last_error=null, $custom_message=null) {
 }
 
 function main() {
-    global $file;
+    global $file, $excludes;
     // Get (redirected) request URI
     $redirect_request_uri = get_redirect_envvar('REQUEST_URI');
     // Get file path by stripping query parameters from the request URI
@@ -263,7 +263,8 @@ function main() {
             }
         }
         // Minify CSS and JS if the filename does not contain 'min.<ext>'
-        if (defined('MINIFY') && MINIFY) switch ($content_type) {
+        if (defined('MINIFY') && MINIFY &&
+            (empty($excludes) || !in_array($file_path, $excludes))) switch ($content_type) {
             case 'text/css':
                 if (strpos($file, 'min.css') === false) {
                     require_once('cssmin.php');
@@ -289,6 +290,7 @@ function main() {
                     catch (Exception $exception) {
                         send_php_error_header($exception);
                     }
+                    file_put_contents(__DIR__ . '/.gz.php.log', $file_path . "\n", FILE_APPEND);
                 }
                 if (defined('EMBED_GRAPHICS_IN_CSS') && EMBED_GRAPHICS_IN_CSS) {
                     // Protect URLs beginning with '/', absolute URLs and
@@ -316,6 +318,7 @@ function main() {
                     }
                     $buffer = str_replace(";'@cc_on@';", "/*@cc_on\n", $buffer);
                     $buffer = str_replace(";'@cc_off@';", "\n@*/", $buffer);
+                    file_put_contents(__DIR__ . '/.gz.php.log', $file_path . "\n", FILE_APPEND);
                 }
                 break;
         }
