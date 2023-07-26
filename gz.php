@@ -183,7 +183,7 @@ function main() {
     
     // Determine Content-Type based on file extension
     $content_type = get_content_type($file);
-    if ($content_type == NULL) errordocument(403, 'Unsupported file type: ' . $file);
+    if ($content_type == NULL) errordocument(500, 'Unsupported file type: ' . $file);
 
     $mtime = filemtime($file);
 
